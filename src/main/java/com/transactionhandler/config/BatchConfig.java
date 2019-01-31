@@ -1,18 +1,14 @@
 package com.transactionhandler.config;
 
-
-
-
-
-
-
-
-
-
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.sql.DataSource;
 
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.Step;
 
 import org.springframework.batch.core.configuration.annotation.DefaultBatchConfigurer;
@@ -22,7 +18,6 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
-
 
 import org.springframework.batch.core.repository.JobRepository;
 
@@ -35,6 +30,8 @@ import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.batch.support.transaction.ResourcelessTransactionManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -45,126 +42,83 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-
+//import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.scheduling.annotation.Scheduled;
 
-
-
+import com.transactionhandler.dal.AccountTransactionEntity;
 import com.transactionhandler.dal.AccountTransactionRepository;
 import com.transactionhandler.dom.AccountTransaction;
-
-
-
-
-
+import com.transactionhandler.dal.AccountTransactionEntity;
+import com.transactionhandler.batch.Writer;
+import org.springframework.core.io.Resource;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 
 @Configuration
-//@EnableTransactionManagement
 @EnableBatchProcessing
-//@EnableJpaRepositories("com.transactionhandler.*")
-//@ComponentScan(basePackages = { "com.transactionhandler.*" })
-//@EntityScan("com.transactionhandler.*") 
-
-
-public class BatchConfig  extends DefaultBatchConfigurer{
-
-
-@Autowired
-public DataSource dataSource;
-
-@Autowired
-public JobBuilderFactory jobBuilderFactory;
-
-@Autowired
-public StepBuilderFactory stepBuilderFactory;
+@Import({ BatchScheduler.class })
+@ComponentScan(basePackages = {"com.transactionhandler.batch"})
+@EntityScan(basePackages = {"com.transactionhandler.dal"} )
+@EnableJpaRepositories(basePackages = {"com.transactionhandler.dal"})
+public class BatchConfig {
 
 
 
+	@Autowired
+	public JobBuilderFactory jobBuilderFactory;
 
-
-@Bean
-public ResourcelessTransactionManager transactionManager() {
-    return new ResourcelessTransactionManager();
-}
-
-@Bean
-public JobRepository jobRepository(ResourcelessTransactionManager transactionManager) throws Exception {
-    MapJobRepositoryFactoryBean mapJobRepositoryFactoryBean = new MapJobRepositoryFactoryBean(transactionManager);
-    mapJobRepositoryFactoryBean.setTransactionManager(transactionManager);
-    return mapJobRepositoryFactoryBean.getObject();
-}
-
-@Bean
-@Primary
-public SimpleJobLauncher jobLauncher(JobRepository jobRepository) {
-    SimpleJobLauncher simpleJobLauncher = new SimpleJobLauncher();
-    simpleJobLauncher.setJobRepository(jobRepository);
-    return simpleJobLauncher;
-}
+	@Autowired
+	public StepBuilderFactory stepBuilderFactory;
 
 
 
+	@Autowired
+	Writer writer;
 
-@Bean
-public DataSource dataSource() {
- final DriverManagerDataSource dataSource = new DriverManagerDataSource();
- dataSource.setDriverClassName("com.mysql.jdbc.Driver");
- dataSource.setUrl("jdbc:mysql://localhost:3306/world");
- dataSource.setUsername("root");
- dataSource.setPassword("password");
- 
- return dataSource;
-}
+	@Value("${input.file}") 
+	Resource resource;
+	
+	@Bean
+	public Job job() {
+		return jobBuilderFactory.get("preprocessJob").incrementer(new RunIdIncrementer()).flow(step1()).end().build();
+	}
 
-@Bean
-public FlatFileItemReader<AccountTransaction> reader(){
- FlatFileItemReader<AccountTransaction> reader = new FlatFileItemReader<AccountTransaction>();
- reader.setResource(new ClassPathResource("account_transaction.csv"));
- reader.setLineMapper(new DefaultLineMapper<AccountTransaction>() {{
-  setLineTokenizer(new DelimitedLineTokenizer() {{
-   setNames(new String[] { "account_transaction_origination_dt", "account_transaction_sys_id", "account_transaction_cd", "account_transaction_dt", "account_transaction_trans_subtyp_cd", "correspondence_dt","quality_cd", "quality_sys_id", "document_number", "ext_source", "identification_cd", "input_file","partition_sys_id", "period_end_dt", "posted_cyc_id", "pin", "unpostable_cd", "unpostable_rsn_cd", "updated_by_trans", "updated_ts", "validity_cd"});
-  }});
-  setFieldSetMapper(new BeanWrapperFieldSetMapper<AccountTransaction>() {{
-   setTargetType(AccountTransaction.class);
-  }});
-  
- }});
- 
- return reader;
-}
+	@Bean
+	public Step step1() {
+		return stepBuilderFactory.get("step1").<AccountTransactionEntity, AccountTransactionEntity>chunk(1).reader(reader())
+				.writer(writer).build();
+	}
 
-@Bean
-public JdbcBatchItemWriter<AccountTransaction> writer(){
- JdbcBatchItemWriter<AccountTransaction> writer = new JdbcBatchItemWriter<AccountTransaction>();
- writer.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<AccountTransaction>());
- writer.setDataSource(dataSource());
- writer.setSql("INSERT INTO account_transaction VALUES (:account_transaction_origination_dt, :account_transaction_sys_id, :account_transaction_cd,:account_transaction_dt, :account_transaction_trans_subtyp_cd, :correspondence_dt, :quality_cd, :quality_sys_id, :document_number, :ext_source, :identification_cd, :input_file, :partition_sys_id, :period_end_dt, :posted_cyc_id, :pin, :unpostable_cd, :unpostable_rsn_cd, :updated_by_trans, :updated_ts, :validity_cd)");
- writer.afterPropertiesSet();
- 
- return writer;
-}
+	@Bean
+	public FlatFileItemReader<AccountTransactionEntity> reader() {
+		FlatFileItemReader<AccountTransactionEntity> reader = new FlatFileItemReader<AccountTransactionEntity>();
+		reader.setResource(resource);
+		reader.setLineMapper(new DefaultLineMapper<AccountTransactionEntity>() {
+			{
+				setLineTokenizer(new DelimitedLineTokenizer() {
+					{
+						setNames(new String[] { "account_transaction_origination_dt", "account_transaction_sys_id",
+								"account_transaction_cd", "account_transaction_dt",
+								"account_transaction_trans_subtyp_cd", "correspondence_dt", "quality_cd",
+								"quality_sys_id", "document_number", "ext_source", "identification_cd", "input_file",
+								"partition_sys_id", "period_end_dt", "posted_cyc_id", "pin", "unpostable_cd",
+								"unpostable_rsn_cd", "updated_by_trans", "updated_ts", "validity_cd" });
+					}
+				});
+				setFieldSetMapper(new BeanWrapperFieldSetMapper<AccountTransactionEntity>() {
+					{
+						setTargetType(AccountTransactionEntity.class);
+					}
+				});
 
-@Bean
-public Step step1() {
- return stepBuilderFactory.get("step1").<AccountTransaction, AccountTransaction> chunk(1)
-   .reader(reader())
-   .writer(writer())
-   .build();
-}
+			}
+		});
+		System.out.println("Item values String");
+		
+		return reader;
+	}
 
-@Bean
-public Job preprocessJob() {
- return jobBuilderFactory.get("preprocessJob")
-   .incrementer(new RunIdIncrementer())
-   .flow(step1())
-   .end()
-   .build();
-}
 
 }
-
-
-
-

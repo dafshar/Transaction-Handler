@@ -9,17 +9,15 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-
-
-
 @Entity
 @Table(name = "account_transaction")
 public class AccountTransactionEntity {
 	
 	private static final long serialVersionUID = 4865903039190150223L;
 	@Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id", nullable = false)
+	private Long id;
 	
 	 @Column(name = "account_transaction_origination_dt", nullable = false)
 	 private Date account_transaction_origination_dt;
@@ -254,11 +252,10 @@ public class AccountTransactionEntity {
 	 public String getPin() {
 		  return pin;
 		 }
-	 
 	 public void setPin(String pin) {
 		  this.pin = pin;
 		 }  
-	 
+
 	 public int getUnpostable_cd() {
 		  return unpostable_cd;
 		 }

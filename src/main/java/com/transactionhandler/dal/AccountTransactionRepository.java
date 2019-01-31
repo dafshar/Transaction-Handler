@@ -12,7 +12,8 @@ public interface AccountTransactionRepository extends JpaRepository<AccountTrans
 	 
     List<AccountTransactionEntity> findAll();
  
-    AccountTransactionEntity save(AccountTransactionEntity persisted);
+    @SuppressWarnings("unchecked")
+	AccountTransactionEntity save(AccountTransactionEntity persisted);
     
     AccountTransactionEntity saveAndFlush(AccountTransactionEntity entity);
     
