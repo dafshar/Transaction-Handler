@@ -13,15 +13,16 @@ import javax.persistence.Table;
 @Table(name = "account_transaction")
 public class AccountTransactionEntity {
 	
-	private static final long serialVersionUID = 4865903039190150223L;
-	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id", nullable = false)
-	private Long id;
+	//private static final long serialVersionUID = 4865903039190150223L;
+	
+    //@GeneratedValue(strategy = GenerationType.IDENTITY)
+	//@Column(name = "id", nullable = false)
+	//private Long id;
 	
 	 @Column(name = "account_transaction_origination_dt", nullable = false)
 	 private Date account_transaction_origination_dt;
 	 
+	 @Id
 	 @Column(name = "account_transaction_sys_id", nullable = false)
 	 private String account_transaction_sys_id;
 	 

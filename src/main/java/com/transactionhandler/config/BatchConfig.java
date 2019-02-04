@@ -22,6 +22,7 @@ import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 
 import org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
@@ -50,6 +51,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import com.transactionhandler.dal.AccountTransactionEntity;
 import com.transactionhandler.dal.AccountTransactionRepository;
 import com.transactionhandler.dom.AccountTransaction;
+
+import com.transactionhandler.batch.Processor;
+
 import com.transactionhandler.dal.AccountTransactionEntity;
 import com.transactionhandler.batch.Writer;
 import org.springframework.core.io.Resource;
@@ -88,7 +92,7 @@ public class BatchConfig {
 	@Bean
 	public Step step1() {
 		return stepBuilderFactory.get("step1").<AccountTransactionEntity, AccountTransactionEntity>chunk(1).reader(reader())
-				.writer(writer).build();
+				.processor(processor()).writer(writer).build();
 	}
 
 	@Bean
@@ -118,6 +122,12 @@ public class BatchConfig {
 		System.out.println("Item values String");
 		
 		return reader;
+	}
+	
+	@Bean
+	public ItemProcessor<AccountTransactionEntity, AccountTransactionEntity> processor() {
+		System.out.println("Initializing Processor bean...");
+	return new Processor();
 	}
 
 
