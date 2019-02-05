@@ -34,15 +34,15 @@ import com.transactionhandler.config.BatchScheduler;
 import com.transactionhandler.dal.*;
 import com.transactionhandler.dom.AccountTransaction;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.launch.JobLauncher;
 
-
-
 @SpringBootApplication
-@EnableScheduling
+// @EnableScheduling
 @Import({ BatchConfig.class })
-public class JobRunner {
+public class JobRunner implements CommandLineRunner {
 
 	@Autowired
 	SimpleJobLauncher jobLauncher;
@@ -50,17 +50,31 @@ public class JobRunner {
 	@Autowired
 	Job job;
 
+	private static Logger logger = LoggerFactory.getLogger(JobRunner.class);
+
 	public static void main(String[] args) throws Exception {
 
-		SpringApplication.run(JobRunner.class);
-	
-	}
-	@Scheduled(cron = "0 1/1 * * * ?")
-	public void perform() throws Exception {
-		JobParameters params = new JobParametersBuilder().addString("JobID", String.valueOf(System.currentTimeMillis()))
-				.toJobParameters();
-		jobLauncher.run(job, params);
+		SpringApplication.run(JobRunner.class, args);
+
 	}
 
+
+
+	@Override
+	public void run(String... args) throws Exception {
+			int exitCode = 0;
+			try {
+				JobParameters params = new JobParametersBuilder()
+						.addString("JobID", String.valueOf(System.currentTimeMillis())).toJobParameters();
+				jobLauncher.run(job, params);
+			} catch (Exception e) {
+				logger.error("Encountered exception.", e);
+				exitCode = -1;
+			}
+			System.exit(exitCode);
+	
+	}
+
+	
 
 }

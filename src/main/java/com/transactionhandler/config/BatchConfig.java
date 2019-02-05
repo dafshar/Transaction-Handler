@@ -6,6 +6,8 @@ import java.util.Date;
 
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -76,14 +78,14 @@ public class BatchConfig {
 	@Autowired
 	public StepBuilderFactory stepBuilderFactory;
 
-
-
 	@Autowired
 	Writer writer;
 
 	@Value("${input.file}") 
 	Resource resource;
 	
+	private static Logger logger = LoggerFactory.getLogger(BatchConfig.class);
+
 	@Bean
 	public Job job() {
 		return jobBuilderFactory.get("preprocessJob").incrementer(new RunIdIncrementer()).flow(step1()).end().build();
@@ -119,7 +121,7 @@ public class BatchConfig {
 
 			}
 		});
-		System.out.println("Item values String");
+		logger.info("Read method Item values String");
 		
 		return reader;
 	}
