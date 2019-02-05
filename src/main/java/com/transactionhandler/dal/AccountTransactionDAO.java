@@ -11,6 +11,8 @@ import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.transactionhandler.dom.AccountTransaction;
+
 
 
 /*
@@ -22,7 +24,7 @@ public class AccountTransactionDAO {
 	@Autowired
 	AccountTransactionRepository repository ;
 
-	public void saveAccountTransactionEntity(AccountTransactionEntity entity){
+	public void saveAccountTransactionEntity(AccountTransaction entity){
 		repository.save(entity);
 	}
 	 

@@ -50,13 +50,11 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import com.transactionhandler.dal.AccountTransactionEntity;
 import com.transactionhandler.dal.AccountTransactionRepository;
 import com.transactionhandler.dom.AccountTransaction;
 
 import com.transactionhandler.batch.Processor;
 
-import com.transactionhandler.dal.AccountTransactionEntity;
 import com.transactionhandler.batch.Writer;
 import org.springframework.core.io.Resource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -65,9 +63,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @Configuration
 @EnableBatchProcessing
 @Import({ BatchScheduler.class })
-@ComponentScan(basePackages = {"com.transactionhandler.batch"})
-@EntityScan(basePackages = {"com.transactionhandler.dal"} )
-@EnableJpaRepositories(basePackages = {"com.transactionhandler.dal"})
+@ComponentScan(basePackages = {"com.transactionhandler.batch","com.transactionhandler.dal","com.transactionhandler.service"})
+@EntityScan(basePackages = {"com.transactionhandler.dom","com.transactionhandler.dal", "com.transactionhandler.service"} )
+@EnableJpaRepositories(basePackages = {"com.transactionhandler.dom","com.transactionhandler.dal","com.transactionhandler.service"})
 public class BatchConfig {
 
 
@@ -93,15 +91,15 @@ public class BatchConfig {
 
 	@Bean
 	public Step step1() {
-		return stepBuilderFactory.get("step1").<AccountTransactionEntity, AccountTransactionEntity>chunk(1).reader(reader())
+		return stepBuilderFactory.get("step1").<AccountTransaction, AccountTransaction>chunk(1).reader(reader())
 				.processor(processor()).writer(writer).build();
 	}
 
 	@Bean
-	public FlatFileItemReader<AccountTransactionEntity> reader() {
-		FlatFileItemReader<AccountTransactionEntity> reader = new FlatFileItemReader<AccountTransactionEntity>();
+	public FlatFileItemReader<AccountTransaction> reader() {
+		FlatFileItemReader<AccountTransaction> reader = new FlatFileItemReader<AccountTransaction>();
 		reader.setResource(resource);
-		reader.setLineMapper(new DefaultLineMapper<AccountTransactionEntity>() {
+		reader.setLineMapper(new DefaultLineMapper<AccountTransaction>() {
 			{
 				setLineTokenizer(new DelimitedLineTokenizer() {
 					{
@@ -113,9 +111,9 @@ public class BatchConfig {
 								"unpostable_rsn_cd", "updated_by_trans", "updated_ts", "validity_cd" });
 					}
 				});
-				setFieldSetMapper(new BeanWrapperFieldSetMapper<AccountTransactionEntity>() {
+				setFieldSetMapper(new BeanWrapperFieldSetMapper<AccountTransaction>() {
 					{
-						setTargetType(AccountTransactionEntity.class);
+						setTargetType(AccountTransaction.class);
 					}
 				});
 
@@ -127,7 +125,7 @@ public class BatchConfig {
 	}
 	
 	@Bean
-	public ItemProcessor<AccountTransactionEntity, AccountTransactionEntity> processor() {
+	public ItemProcessor<AccountTransaction, AccountTransaction> processor() {
 		System.out.println("Initializing Processor bean...");
 	return new Processor();
 	}

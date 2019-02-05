@@ -9,20 +9,22 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.Repository;
 
+import com.transactionhandler.dom.AccountTransaction;
 
-public interface AccountTransactionRepository extends JpaRepository<AccountTransactionEntity, String>{
+
+public interface AccountTransactionRepository extends JpaRepository<AccountTransaction, String>{
 	
-	void delete(AccountTransactionEntity deleted);
+	void delete(AccountTransaction deleted);
 	 
-    List<AccountTransactionEntity> findAll();
+    List<AccountTransaction> findAll();
     
-    List<AccountTransactionEntity> findAllByPin(String pin);
+    List<AccountTransaction> findAllByPin(String pin);
     
  
     @SuppressWarnings("unchecked")
-	AccountTransactionEntity save(AccountTransactionEntity persisted);
+	AccountTransaction save(AccountTransaction persisted);
     
-    AccountTransactionEntity saveAndFlush(AccountTransactionEntity entity);
+    AccountTransaction saveAndFlush(AccountTransaction entity);
     
     /*
     @Query("SELECT account_transaction_sys_id FROM account_transaction where quality_sys_id='Sysidqual'")

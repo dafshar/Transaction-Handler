@@ -7,11 +7,12 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 
-import com.transactionhandler.dal.AccountTransactionEntity;
 
-@Repository
+@Service
 public class AccountTransactionServiceImpl implements AccountTransactionService{
 	
 	@Autowired
@@ -20,12 +21,14 @@ public class AccountTransactionServiceImpl implements AccountTransactionService{
 	
 	
 	 @Override
-	    public List<AccountTransactionEntity> findAllByPin(String pin) {
+	    public String findCustSysIdByPin(String pin) {
 	        try {
-	            String sql = "SELECT account_transaction_sys_id FROM account_transaction where pin='1234' ";
+	            String sql = "select cust.customer_sys_id from Customer cust, AccountTransaction acct \r\n" + 
+	            		"where cust.pin="+pin+"and cust.validity_cd=acct.validity_cd";
 	            Query query = entityManager.createQuery(sql);
-	            return (List<AccountTransactionEntity>) query.getSingleResult();
+	            return (String) query.getSingleResult();
 	        } catch (NoResultException e) {
+	        	System.out.println("Customer does not exist");
 	            return null;
 	        }
 	    }

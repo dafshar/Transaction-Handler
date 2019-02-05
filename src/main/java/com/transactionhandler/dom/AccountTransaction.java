@@ -2,50 +2,85 @@ package com.transactionhandler.dom;
 
 import java.util.Date;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
+@Entity
+@Table(name = "account_transaction")
 public class AccountTransaction {
 	
-
+	//private static final long serialVersionUID = 4865903039190150223L;
+	
+    //@GeneratedValue(strategy = GenerationType.IDENTITY)
+	//@Column(name = "id", nullable = false)
+	//private Long id;
+	
+	 @Column(name = "account_transaction_origination_dt", nullable = false)
 	 private Date account_transaction_origination_dt;
-
+	 
+	 @Id
+	 @Column(name = "account_transaction_sys_id", nullable = false)
 	 private String account_transaction_sys_id;
-
+	 
+	 @Column(name = "account_transaction_cd", nullable = false)
 	 private int account_transaction_cd;
-
+	 
+	 @Column(name = "account_transaction_dt", nullable = false)
 	 private Date account_transaction_dt;
-
+	 
+	 @Column(name = "account_transaction_trans_subtyp_cd", nullable = true)
 	 private int account_transaction_trans_subtyp_cd;
-
+	 
+	 @Column(name = "correspondence_dt", nullable = true)
 	 private Date correspondence_dt;
-
+	 
+	 @Column(name = "quality_cd", nullable = false)
 	 private int quality_cd;
-
+	 
+	 @Column(name = "quality_sys_id", nullable = true)
 	 private String quality_sys_id;
-
+	 
+	 @Column(name = "document_number", nullable = true)
 	 private String document_number;
-
+	 
+	 @Column(name = "ext_source", nullable = false)
 	 private String ext_source;
-
+	 
+	 @Column(name = "identification_cd", nullable = false)
 	 private int identification_cd;
-
+	 
+	 @Column(name = "input_file", nullable = true)
 	 private String input_file;
-
+	 
+	 @Column(name = "partition_sys_id", nullable = false)
 	 private String partition_sys_id;
-
+	 
+	 @Column(name = "period_end_dt", nullable = true)
 	 private Date period_end_dt;
-
+	 
+	 @Column(name = "posted_cyc_id", nullable = true)
 	 private String posted_cyc_id;
-
+	 
+	 @Column(name = "pin", nullable = false)
 	 private String pin;
-
+	 
+	 @Column(name = "unpostable_cd", nullable = true)
 	 private int unpostable_cd;
-
+	 
+	 @Column(name = "unpostable_rsn_cd", nullable = true)
 	 private int unpostable_rsn_cd;
-
+	 
+	 @Column(name = "updated_by_trans", nullable = false)
 	 private String updated_by_trans;
-
+	 
+	 @Column(name = "updated_ts", nullable = false)
 	 private Date updated_ts;
-
+	 
+	 @Column(name = "validity_cd", nullable = false)
 	 private int validity_cd;
 	 
 	 public AccountTransaction() {}
@@ -93,6 +128,7 @@ public class AccountTransaction {
 		 this.updated_ts = updated_ts;
 		 this.validity_cd = validity_cd;
 	    }
+
 
 	 public Date getAccount_transaction_origination_dt() {
 	  return account_transaction_origination_dt;
@@ -217,11 +253,10 @@ public class AccountTransaction {
 	 public String getPin() {
 		  return pin;
 		 }
-	 
 	 public void setPin(String pin) {
 		  this.pin = pin;
 		 }  
-	 
+
 	 public int getUnpostable_cd() {
 		  return unpostable_cd;
 		 }

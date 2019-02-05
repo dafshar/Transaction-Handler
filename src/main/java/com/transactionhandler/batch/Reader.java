@@ -6,9 +6,9 @@ import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.core.io.Resource;
 
-import com.transactionhandler.dal.AccountTransactionEntity;
+import com.transactionhandler.dom.AccountTransaction;
 
-public class Reader extends FlatFileItemReader<AccountTransactionEntity> {
+public class Reader extends FlatFileItemReader<AccountTransaction> {
 	
 	public Reader(Resource resource) {
 		
@@ -26,10 +26,10 @@ public class Reader extends FlatFileItemReader<AccountTransactionEntity> {
 		lineTokenizer.setDelimiter(",");
 	    lineTokenizer.setStrict(false);
 	    
-	    BeanWrapperFieldSetMapper<AccountTransactionEntity> fieldSetMapper = new BeanWrapperFieldSetMapper<>();
-        fieldSetMapper.setTargetType(AccountTransactionEntity.class);
+	    BeanWrapperFieldSetMapper<AccountTransaction> fieldSetMapper = new BeanWrapperFieldSetMapper<>();
+        fieldSetMapper.setTargetType(AccountTransaction.class);
 
-		DefaultLineMapper<AccountTransactionEntity> defaultLineMapper = new DefaultLineMapper<>();
+		DefaultLineMapper<AccountTransaction> defaultLineMapper = new DefaultLineMapper<>();
 		defaultLineMapper.setLineTokenizer(lineTokenizer);
 		defaultLineMapper.setFieldSetMapper(fieldSetMapper);
 		setLineMapper(defaultLineMapper);
