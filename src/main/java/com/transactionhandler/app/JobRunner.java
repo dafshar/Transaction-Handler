@@ -34,8 +34,8 @@ import com.transactionhandler.config.BatchScheduler;
 import com.transactionhandler.dal.*;
 import com.transactionhandler.dom.AccountTransaction;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.launch.JobLauncher;
 
@@ -50,7 +50,7 @@ public class JobRunner implements CommandLineRunner {
 	@Autowired
 	Job job;
 
-	private static Logger logger = LoggerFactory.getLogger(JobRunner.class);
+	private static Log logger = LogFactory.getLog(JobRunner.class);
 
 	public static void main(String[] args) throws Exception {
 
