@@ -24,6 +24,7 @@ import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 
 import org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean;
+import org.springframework.batch.core.step.skip.SkipPolicy;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
@@ -53,17 +54,20 @@ import org.springframework.scheduling.annotation.Scheduled;
 import com.transactionhandler.dal.AccountTransactionRepository;
 import com.transactionhandler.dom.AccountTransaction;
 
+import com.transactionhandler.listener.ProcessorListener;
+
 import com.transactionhandler.batch.Processor;
 
 import com.transactionhandler.batch.Writer;
 import org.springframework.core.io.Resource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import com.transactionhandler.policy.*;
 
 
 @Configuration
 @EnableBatchProcessing
 @Import({ BatchScheduler.class })
-@ComponentScan(basePackages = {"com.transactionhandler.batch","com.transactionhandler.dal","com.transactionhandler.service"})
+@ComponentScan(basePackages = {"com.transactionhandler.batch","com.transactionhandler.dal","com.transactionhandler.service","com.transactionhandler.dom"})
 @EntityScan(basePackages = {"com.transactionhandler.dom","com.transactionhandler.dal", "com.transactionhandler.service"} )
 @EnableJpaRepositories(basePackages = {"com.transactionhandler.dom","com.transactionhandler.dal","com.transactionhandler.service"})
 public class BatchConfig {
@@ -92,7 +96,7 @@ public class BatchConfig {
 	@Bean
 	public Step step1() {
 		return stepBuilderFactory.get("step1").<AccountTransaction, AccountTransaction>chunk(1).reader(reader())
-				.processor(processor()).writer(writer).build();
+				.processor(processor()).faultTolerant().skipPolicy(ProcessorSkipPolicy()).writer(writer).listener(processorListener()).build();
 	}
 
 	@Bean
@@ -129,6 +133,17 @@ public class BatchConfig {
 		System.out.println("Initializing Processor bean...");
 	return new Processor();
 	}
+	
+	@Bean
+	public ProcessorListener processorListener() {
+		return new ProcessorListener();
+	}
+	
+	@Bean
+	public SkipPolicy ProcessorSkipPolicy() {
+	    return new ProcessorSkipPolicy();
+	}
+	
 
 
 }
